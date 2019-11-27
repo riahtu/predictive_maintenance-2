@@ -3,8 +3,8 @@ import sys
 from  utility.DataCleaning import * 
 from  utility.DataExploration import * 
 
-dc = DataCleaning()
+# dc = DataCleaning()
 # df = dc.clean()
-# de = DataExploration()
-# de.calculate_temperature_average()
+de = DataExploration()
+de.calculate_temperature_average()
 # df.show()

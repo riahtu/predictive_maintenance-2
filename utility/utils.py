@@ -1,26 +1,18 @@
 from utility.Config import *
 from utility.Spark import *
-from pyspark.sql.types import DateType
+from pyspark.sql.types import *
 import sys, os, glob
 import pandas as pd
 from datetime import datetime
 from pyspark.mllib.stat import Statistics
 from  pyspark.sql.functions import * 
 from pyspark.ml.regression import GeneralizedLinearRegression
-
+from pyspark.ml.feature import VectorAssembler
+from pyspark.mllib.regression import LabeledPoint
+from pyspark.ml.stat import ChiSquareTest
 
 spark = get_spark_session("")
 spark.sparkContext.setLogLevel('ERROR')
-
-
-def consolidate_csv(data_path):
-    
-    os.chdir(os.path.join(sys.path[0], data_path)) 
-    extension = 'csv'
-    raw_files = [i for i in glob.glob('*.{}'.format(extension))]
-
-    combined_csv = pd.concat([pd.read_csv(f) for f in raw_files])
-    combined_csv.to_csv( "harddrive.csv", index=False, encoding='utf-8-sig')
 
 def drop_nan(df):
     aggregated_row = df.select([(count(when(col(c).isNull(), c))/df.count()).alias(c) for c in df.columns]).collect()
@@ -44,6 +36,16 @@ def write_df_to_file(df):
     # del_file(filename)
     # filename = updated_filename
     # return read_csv(filename)
+def get_smart_stats(df):
+    return [i for i in df.columns if i[:len('smart')]=='smart']
+
+def get_col_as_list(df ,col_):
+    return df.select(col_).rdd.flatMap(lambda x: x).collect()
+
+def vector_assembler(df):
+    smart_list  = get_smart_stats(df)
+    assembler = VectorAssembler(inputCols=smart_list,outputCol="features")
+    return assembler.transform(df)
 
 def del_file():
     os.remove(filename)
