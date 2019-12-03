@@ -37,16 +37,16 @@ class DataExploration:
         list_smart_cols = get_smart_stats(df)   
         list_smart_cols.append("failure")
         list_smart_cols.append("capacity_bytes")
-        print("this is the list ********************", list_smart_cols)
+        # print("this is the list ********************", list_smart_cols)
         for c in list_smart_cols:
             df = df.withColumn(c,col(c).cast(DecimalType(18,0))) # Adjust the decimals you want here.
-        print("this is the resulting df after change of cols ************************")
+        # print("this is the resulting df after change of cols ************************")
         # df.show()
         return cache(df)
 
     def correlation_temp_failure(self,df, model_list):
         # model_list = ["TOSHIBA MD04ABA400V"] 
-       
+        print("corelation temppppppppp***************")
         new_df = self.create_dataframe()
         # new_df.show()
         for model in model_list:
@@ -56,7 +56,7 @@ class DataExploration:
             print("correlation **************************", df_temp.stat.corr("smart_194_raw","failure"))
             stat = df_temp.stat.corr("smart_194_raw","failure")
             assembler = self.vector_assembler(df_temp)
-            p_value = float(self.get_p_value(assembler))
+            p_value = self.get_p_value(assembler)
             print("thisis the value of pv*************** ", p_value)
             significance = str(self.significance(p_value))
             statistic = self.get_statistic(assembler)
@@ -64,9 +64,9 @@ class DataExploration:
             print("num deadddd real () ", num_dead)
             num_alive = self.num_alive_per_model(df_temp, str(model))
             print("num alivedd real () ", num_alive)
-        #     new_df = self.populate_df(new_df, model, stat, significance, p_value, num_dead, num_alive, drive_age)
-        # new_df = new_df.orderBy("p_value")
-        # new_df.show()
+            new_df = self.populate_df(new_df, model, stat, significance, p_value, num_dead, num_alive, drive_age)
+        new_df = new_df.orderBy("p_value")
+        new_df.show()
 
     def get_drive_age_per_model(self, df):
         df = df.select(((mean(df.smart_9_raw)/24)/365).alias("drive_age"))
@@ -96,22 +96,25 @@ class DataExploration:
     def num_failed_per_model(self, df, model):
         # print("num dead ***************" , df.filter((df.model == model) & (df.failure == 1) ).count())
         df = df.filter((df.model == model) & (df.failure == 1) )
-        print("printing count  dead ******************")
-        df.select(countDistinct("serial_number")).show()
+        df = df.select(countDistinct("serial_number").alias("distinct_model"))
+        col_list = get_col_as_list(df,df.distinct_model)
+        # print("printing count  dead ****************** ", col_list[0])
+        # df.show()
 
-        return  1
+        return  col_list[0]
 
     def num_alive_per_model(self, df, model):
         # print("num alive ******************** ", df.filter((df.model == model) & (df.failure == 0) ).count())
         df = df.filter((df.model == model) & (df.failure == 0) )
-        print("printing count  alive ******************")
-        df.select(countDistinct("serial_number")).show()
-
-        return 1
+        # print("printing count  alive ******************")
+        df = df.select(countDistinct("serial_number").alias("distinct_model"))
+        col_list = get_col_as_list(df,df.distinct_model)
+        # print("printing count  alive ****************** ", col_list[0])
+        return col_list[0]
 
 
     def significance(self,p_value):
-        print("significance : ", p_value <= 0.05)
+        # print("significance : ", p_value <= 0.05)
         return (p_value <= 0.05)
 
     def vector_assembler(self,df):
@@ -126,7 +129,7 @@ class DataExploration:
 
     def get_p_value(self,r):
         print("pValues: " , r.pValues[0])
-        return r.pValues[0]
+        return float(round(r.pValues[0],2))
 
         #    get_all_maker_corr = df.groupBy("model").agg(
         #     corr("smart_194_raw","failure").alias("correlation")).collect() 
