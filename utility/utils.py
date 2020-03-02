@@ -29,13 +29,20 @@ def mean_udf(v):
     return round(v.mean(), 2)
 
 def read_csv(filename):
-    return cache(spark.read.csv(filename, header="true"))
+    return cache(spark.read.csv(filename, header="true", inferSchema="true"))
 
-def write_df_to_file(df):
-    df.write.csv(updated_filename, header="true")
-    # del_file(filename)
-    # filename = updated_filename
-    # return read_csv(filename)
+def write_df_to_file(df, uid):
+    new_uid = append_id(filename, uid)
+    print("this is the new uid " , new_uid)
+    df.write.csv(new_uid, header="true")
+
+# def generate_id(size=7, chars=string.ascii_uppercase + string.digits):
+#     return ''.join(random.choice(chars) for _ in range(size))
+
+def append_id(filename, uid):
+    name, ext = os.path.splitext(filename)
+    return "{name}_{uid}{ext}".format(name=name, uid=uid, ext=ext)
+
 def get_smart_stats(df):
     return [i for i in df.columns if i[:len('smart')]=='smart']
 
@@ -57,4 +64,5 @@ def matchManufacturer(manufacturer):
             return n[k]
         elif manufacturer == k:
             return n[k] 
-        
+
+# print(append_id("hard.csv", "clean"))

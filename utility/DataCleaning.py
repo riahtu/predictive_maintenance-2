@@ -5,7 +5,7 @@ from utility.utils import *
 
 class DataCleaning:
     def __init__(self):
-        self.spark = get_spark_session("hdsdsdsd")
+        self.spark = spark
         self.filename = filename
         self.df_target = read_csv(self.filename)
         # consolidate_csv(data_path)
@@ -34,8 +34,8 @@ class DataCleaning:
         # print("removing extreme drive days ***************************************")
         # df_temp = self.out_of_bounds_drive_days(df_temp)
         print("WRITING TO FILE ******************************************************")
-        write_df_to_file(df_temp)
-        df_temp.show()  
+        write_df_to_file(df_temp, "cleaning")
+        return df_temp  
 
     def populate_MFG(self,df):
         match_udf = udf(matchManufacturer)
@@ -54,8 +54,8 @@ class DataCleaning:
         aggregated_row = df.select([(count(when(col(c).isNull(), c))/df.count()).alias(c) for c in df.columns]).collect()
         aggregated_dict_list = [row.asDict() for row in aggregated_row]
         aggregated_dict = aggregated_dict_list[0]  
-        col_null_g_75p=list({i for i in aggregated_dict if aggregated_dict[i] > 0.75})
-        df = df.drop(*col_null_g_75p)
+        col_null_g_90p=list({i for i in aggregated_dict if aggregated_dict[i] > 0.90})
+        df = df.drop(*col_null_g_90p)
         return cache(df)
 
     def remove_normalised_features(self,df):

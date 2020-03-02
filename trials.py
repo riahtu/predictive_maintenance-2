@@ -1,1 +1,6 @@
-('type : ****************** ', [('date', 'string'), ('serial_number', 'string'), ('model', 'string'), ('capacity_bytes', 'decimal(18,0)'), ('failure', 'decimal(18,0)'), ('smart_1_raw', 'decimal(18,0)'), ('smart_3_raw', 'decimal(18,0)'), ('smart_4_raw', 'decimal(18,0)'), ('smart_5_raw', 'decimal(18,0)'), ('smart_7_raw', 'decimal(18,0)'), ('smart_9_raw', 'decimal(18,0)'), ('smart_10_raw', 'decimal(18,0)'), ('smart_12_raw', 'decimal(18,0)'), ('smart_187_raw', 'decimal(18,0)'), ('smart_188_raw', 'decimal(18,0)'), ('smart_189_raw', 'decimal(18,0)'), ('smart_190_raw', 'decimal(18,0)'), ('smart_191_raw', 'decimal(18,0)'), ('smart_192_raw', 'decimal(18,0)'), ('smart_193_raw', 'decimal(18,0)'), ('smart_194_raw', 'decimal(18,0)'), ('smart_195_raw', 'decimal(18,0)'), ('smart_196_raw', 'decimal(18,0)'), ('smart_197_raw', 'decimal(18,0)'), ('smart_198_raw', 'decimal(18,0)'), ('smart_199_raw', 'decimal(18,0)'), ('smart_200_raw', 'decimal(18,0)'), ('smart_201_raw', 'decimal(18,0)'), ('smart_220_raw', 'decimal(18,0)'), ('smart_224_raw', 'decimal(18,0)'), ('smart_225_raw', 'decimal(18,0)'), ('smart_226_raw', 'decimal(18,0)'), ('smart_242_raw', 'decimal(18,0)'), ('smart_250_raw', 'decimal(18,0)'), ('smart_251_raw', 'decimal(18,0)'), ('MFG', 'string')])
+import os, sys
+def append_id(filename, uid):
+    name, ext = os.path.splitext(filename)
+    return "{name}_{uid}{ext}".format(name=name, uid=uid, ext=ext)
+print(
+append_id("hard.csv", "new"))

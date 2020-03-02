@@ -2,9 +2,9 @@ import sys
 # print(sy)
 from  utility.DataCleaning import * 
 from  utility.DataExploration import * 
+from  utility.FeatureSelector import *
 
-# dc = DataCleaning()
-# df = dc.clean()
-de = DataExploration()
-de.calculate_temperature_average()
-# df.show()
+# dc = DataCleaning() 
+# de = DataExploration() 
+fc = FeatureSelector() 
+

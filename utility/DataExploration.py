@@ -7,28 +7,34 @@ from utility.utils import *
 class DataExploration:
     def __init__(self):
         self.spark = get_spark_session("hdsdsdsd")
-        self.filename = updated_filename
+        self.filename = append_id(filename,"cleaning")
         self.df_target = read_csv(self.filename)
+
+        self.calculate_temperature_average()
         # print("df target **********************************")
         # self.df_target.show()
         # self.del_file() 
 
-    def calculate_temperature_average(self):
+    def calculate_temperature_average(self): 
         # smart_194_raw is temperation SMART Statistic
         df_temp = self.drop_extreme_temp(self.df_target)
         # df_temp.show()
         df_temp = self.change_cols_to_float(df_temp)
+        print(df_temp.dtypes, "explore types*******************")
+        print("****************************************************************")
+        write_df_to_file(df_temp, "exploration")
         df_temp_avg = df_temp\
                                 .groupBy(["MFG","model"])\
                                 .agg(round(mean("smart_194_raw"),2).alias("avg_Temp"))\
                                 .orderBy("avg_Temp") 
         model_list = get_col_as_list(df_temp_avg, df_temp_avg.model)
         print("printing avergaes ********************************")
-        # df_temp_avg.show()
-        self.correlation_temp_failure(df_temp, model_list)
-        
-        # self.correlation_temp_failure___(df_temp)  
-
+        correlation = self.correlation_temp_failure(df_temp, model_list)
+        print("WRITING TO FILE ******************************************************")
+        write_df_to_file(correlation, "correlation")
+        correlation.show()
+        return correlation
+       
     def drop_extreme_temp(self,df):
         print("printing avergaes ****hjhjhjhjhjhjhjhjhjhjhjhjh****************************")
         return df.filter((df.smart_194_raw >= 18.0))
@@ -39,7 +45,7 @@ class DataExploration:
         list_smart_cols.append("capacity_bytes")
         # print("this is the list ********************", list_smart_cols)
         for c in list_smart_cols:
-            df = df.withColumn(c,col(c).cast(DecimalType(18,0))) # Adjust the decimals you want here.
+            df = df.withColumn(c,col(c).cast(FloatType())) # Adjust the decimals you want here.
         # print("this is the resulting df after change of cols ************************")
         # df.show()
         return cache(df)
@@ -66,7 +72,8 @@ class DataExploration:
             print("num alivedd real () ", num_alive)
             new_df = self.populate_df(new_df, model, stat, significance, p_value, num_dead, num_alive, drive_age)
         new_df = new_df.orderBy("p_value")
-        new_df.show()
+        return new_df
+        
 
     def get_drive_age_per_model(self, df):
         df = df.select(((mean(df.smart_9_raw)/24)/365).alias("drive_age"))
@@ -81,7 +88,7 @@ class DataExploration:
         StructField("p_value",DoubleType(),True),
         StructField("Num_dead",IntegerType(),True),
         StructField("Num_alive",IntegerType(),True),
-         StructField("Drive_Age (years)",DoubleType(),True)
+        StructField("Drive_Age (years)",DoubleType(),True)
         ])
         return spark.createDataFrame([], schema)
     
@@ -128,9 +135,8 @@ class DataExploration:
         return str(r.statistics)
 
     def get_p_value(self,r):
-        print("pValues: " , r.pValues[0])
-        return float(round(r.pValues[0],2))
-
+        print("pValues: " , r.pValues[0], float(r.pValues[0]))
+        return float(r.pValues[0])
         #    get_all_maker_corr = df.groupBy("model").agg(
         #     corr("smart_194_raw","failure").alias("correlation")).collect() 
 
