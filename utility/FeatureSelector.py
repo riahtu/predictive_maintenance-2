@@ -38,6 +38,7 @@ class FeatureSelector():
         # print("dropping these ", to_drop) 
 
         self.data = self.data.drop(*to_drop)
+        print("num of cols $$$$$$$$$$$$$$$$$$$$$$$$$$ ", len(self.data.columns))
         print("before ************************", self.data.dtypes)
         self.data = change_cols_to_float(self.data)
         print("after ***************************",self.data.dtypes)
@@ -373,7 +374,9 @@ class FeatureSelector():
         # Find the number of features identified to drop
         self.all_identified = set(list(chain(*list(self.ops.values()))))
         self.n_identified = len(self.all_identified)
-        self.remove(methods = 'all', keep_one_hot=False).head()
+        newd = self.remove(methods = 'all', keep_one_hot=False)
+        print("dsdsdsdsd")
+        newd.head()
         print('%d total features out of %d identified for removal after one-hot encoding.\n' % (self.n_identified, 
                                                                                                   self.data_all.shape[1]))
         
