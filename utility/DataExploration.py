@@ -19,7 +19,7 @@ class DataExploration:
         # smart_194_raw is temperation SMART Statistic
         df_temp = self.drop_extreme_temp(self.df_target)
         # df_temp.show()
-        df_temp = self.change_cols_to_float(df_temp)
+        df_temp = change_cols_to_float(df_temp)
         print(df_temp.dtypes, "explore types*******************")
         print("****************************************************************")
         write_df_to_file(df_temp, "exploration")
@@ -39,16 +39,7 @@ class DataExploration:
         print("printing avergaes ****hjhjhjhjhjhjhjhjhjhjhjhjh****************************")
         return df.filter((df.smart_194_raw >= 18.0))
 
-    def change_cols_to_float(self,df):
-        list_smart_cols = get_smart_stats(df)   
-        list_smart_cols.append("failure")
-        list_smart_cols.append("capacity_bytes")
-        # print("this is the list ********************", list_smart_cols)
-        for c in list_smart_cols:
-            df = df.withColumn(c,col(c).cast(FloatType())) # Adjust the decimals you want here.
-        # print("this is the resulting df after change of cols ************************")
-        # df.show()
-        return cache(df)
+    
 
     def correlation_temp_failure(self,df, model_list):
         # model_list = ["TOSHIBA MD04ABA400V"] 

@@ -18,6 +18,7 @@ from utility.Config import *
 from utility.Spark import *
 from utility.utils import *
 
+
 class FeatureSelector():
     
     def __init__(self, labels=None):
@@ -27,7 +28,7 @@ class FeatureSelector():
         # Dataset and optional training labels
         self.data = read_csv(self.filename)
         print("types**********************************")
-        print(self.data.dtypes)
+        
         #drop non smart columns
         list_smart_cols = get_smart_stats(self.data)   
         list_smart_cols.append("failure")
@@ -37,6 +38,9 @@ class FeatureSelector():
         # print("dropping these ", to_drop) 
 
         self.data = self.data.drop(*to_drop)
+        print("before ************************", self.data.dtypes)
+        self.data = change_cols_to_float(self.data)
+        print("after ***************************",self.data.dtypes)
         self.data = self.data.toPandas()
         
 
@@ -233,7 +237,7 @@ class FeatureSelector():
         self.one_hot_features = [column for column in features.columns if column not in self.base_features]
 
         # Add one hot encoded data to original data
-        # self.data_all = pd.concat([features[self.one_hot_features], self.data], axis = 1)
+        self.data_all = pd.concat([features[self.one_hot_features], self.data], axis = 1)
         # print("data alll ******************************************")
         # # Extract feature names
         feature_names = list(features.columns)
@@ -356,22 +360,22 @@ class FeatureSelector():
                 raise ValueError('%s is a required parameter for this method.' % param)
         
         # Implement each of the five methods
-        # self.identify_missing(selection_params['missing_threshold'])
-        # self.identify_single_unique()
-        # self.identify_collinear(selection_params['correlation_threshold'])
+        self.identify_missing(selection_params['missing_threshold'])
+        self.identify_single_unique()
+        self.identify_collinear(selection_params['correlation_threshold'])
         
         
         self.identify_zero_importance(task = selection_params['task'], eval_metric = selection_params['eval_metric'])
-        # self.identify_low_importance(selection_params['cumulative_importance'])
+        self.identify_low_importance(selection_params['cumulative_importance'])
         print("showinf remoe*****************************")
-        # self.remove(methods = 'all', keep_one_hot=False).head()
+        
 
         # Find the number of features identified to drop
-        # self.all_identified = set(list(chain(*list(self.ops.values()))))
-        # self.n_identified = len(self.all_identified)
-        
-        # print('%d total features out of %d identified for removal after one-hot encoding.\n' % (self.n_identified, 
-                                                                                                #   self.data_all.shape[1]))
+        self.all_identified = set(list(chain(*list(self.ops.values()))))
+        self.n_identified = len(self.all_identified)
+        self.remove(methods = 'all', keep_one_hot=False).head()
+        print('%d total features out of %d identified for removal after one-hot encoding.\n' % (self.n_identified, 
+                                                                                                  self.data_all.shape[1]))
         
     def check_removal(self, keep_one_hot=True):
         

@@ -65,4 +65,11 @@ def matchManufacturer(manufacturer):
         elif manufacturer == k:
             return n[k] 
 
+def change_cols_to_float(df):
+    list_smart_cols = get_smart_stats(df)   
+    list_smart_cols.append("failure")
+    list_smart_cols.append("capacity_bytes")
+    for c in list_smart_cols:
+        df = df.withColumn(c,col(c).cast(FloatType()))
+    return cache(df)
 # print(append_id("hard.csv", "clean"))
